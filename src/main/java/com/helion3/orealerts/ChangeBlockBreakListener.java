@@ -128,7 +128,6 @@ final public class ChangeBlockBreakListener {
                     BlockSnapshot neighbor = neighborLocation.getBlock().snapshotFor(neighborLocation);
 
                     if (neighbor.getState().getType().equals(snapshot.getState().getType()) && !OreAlerts.recentLocations.containsKey(neighborLocation)) {
-                        System.out.println("Vein match found " + neighborLocation.getBlockX() + " " + neighborLocation.getBlockZ() + " " + neighborLocation.getBlockY());
                         matchCount++;
                         if (matchCount < 30) {
                             matchCount += findNeighborBlocks(neighbor);

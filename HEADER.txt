@@ -1,4 +1,4 @@
-This file is part of Darmok, licensed under the MIT License (MIT).
+This file is part of OreAlerts, licensed under the MIT License (MIT).
 
 Copyright (c) ${year} ${organization} ${url}
 
