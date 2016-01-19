@@ -24,9 +24,9 @@
 package com.helion3.orealerts;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.spongepowered.api.Game;
@@ -41,7 +41,7 @@ import com.google.inject.Inject;
 @Plugin(id = "OreAlerts", name = "OreAlerts", version = "1.0")
 final public class OreAlerts {
     private static Game game;
-    public static Map<Location<World>, Long> recentLocations = new HashMap<Location<World>, Long>();
+    public static Map<Location<World>, Long> recentLocations = new ConcurrentHashMap<Location<World>, Long>();
 
     /**
      * Performs bootstrapping of Prism resources/objects.
