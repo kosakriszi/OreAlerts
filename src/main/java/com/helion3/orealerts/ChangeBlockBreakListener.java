@@ -107,8 +107,7 @@ final public class ChangeBlockBreakListener {
         return (type.equals(BlockTypes.IRON_ORE) ||
                 type.equals(BlockTypes.GOLD_ORE) ||
                 type.equals(BlockTypes.DIAMOND_ORE) ||
-                type.equals(BlockTypes.LAPIS_ORE) ||
-                type.equals(BlockTypes.QUARTZ_ORE));
+                type.equals(BlockTypes.LAPIS_ORE));
     }
 
     private int findNeighborBlocks(BlockSnapshot snapshot) {
