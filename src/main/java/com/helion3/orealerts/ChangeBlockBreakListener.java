@@ -64,7 +64,13 @@ final public class ChangeBlockBreakListener {
         }
 
         for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
+            // Skip if we've alerted this
             if (OreAlerts.recentLocations.containsKey(transaction.getOriginal().getLocation().get())) {
+                continue;
+            }
+
+            // Skip if there was a creator
+            if (transaction.getOriginal().getCreator().isPresent()) {
                 continue;
             }
 

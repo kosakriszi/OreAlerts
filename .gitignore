@@ -37,6 +37,7 @@ intermediate
 publish
 .idea
 
+*.iml
 
 # Eclipse stuff
 .classpath
