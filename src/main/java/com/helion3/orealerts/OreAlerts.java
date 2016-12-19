@@ -38,7 +38,7 @@ import org.spongepowered.api.world.World;
 
 import com.google.inject.Inject;
 
-@Plugin(id = "orealerts", name = "orealerts", version = "1.0")
+@Plugin(id = "orealerts", name = "OreAlerts", description = "Ore alert plugin for Sponge servers.", version = "1.0")
 final public class OreAlerts {
     private static Game game;
     public static Map<Location<World>, Long> recentLocations = new ConcurrentHashMap<Location<World>, Long>();
