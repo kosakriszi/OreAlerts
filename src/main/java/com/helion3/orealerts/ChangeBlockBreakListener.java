@@ -31,6 +31,8 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.property.block.GroundLuminanceProperty;
+import org.spongepowered.api.data.property.block.LightEmissionProperty;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
@@ -80,8 +82,18 @@ final public class ChangeBlockBreakListener {
                 // Count blocks in this vein
                 int matchCount = findNeighborBlocks(transaction.getOriginal()) + 1;
 
-                // Message
-                channel.send(Text.of(getColor(type), "[ore] ", player.getName(), " found " + matchCount + " ", getNiceName(type)));
+                // Get lighting condition
+                Optional<GroundLuminanceProperty> lightOptional = transaction.getOriginal().getLocation().get().getProperty(GroundLuminanceProperty.class);
+
+                if(lightOptional.isPresent()) {
+                    double emittedLight = lightOptional.get().getValue();
+
+                    // Message with lighting emission
+                    channel.send(Text.of(getColor(type), "[Ore] ", player.getName(), " found " + matchCount + " ", getNiceName(type), "in ", emittedLight, " light."));
+                } else {
+                    // Message
+                    channel.send(Text.of(getColor(type), "[Ore] ", player.getName(), " found " + matchCount + " ", getNiceName(type)));
+                }
             }
          }
     }
