@@ -86,10 +86,10 @@ final public class ChangeBlockBreakListener {
                 Optional<GroundLuminanceProperty> lightOptional = transaction.getOriginal().getLocation().get().getProperty(GroundLuminanceProperty.class);
 
                 if(lightOptional.isPresent()) {
-                    double emittedLight = lightOptional.get().getValue();
+                    int emittedLight = (int) Math.floor((lightOptional.get().getValue() / 15D) * 100);
 
                     // Message with lighting emission
-                    channel.send(Text.of(getColor(type), "[Ore] ", player.getName(), " found " + matchCount + " ", getNiceName(type), "in ", emittedLight, " light."));
+                    channel.send(Text.of(getColor(type), "[Ore] ", player.getName(), " found " + matchCount + " ", getNiceName(type), "in ", emittedLight, "% light."));
                 } else {
                     // Message
                     channel.send(Text.of(getColor(type), "[Ore] ", player.getName(), " found " + matchCount + " ", getNiceName(type)));
