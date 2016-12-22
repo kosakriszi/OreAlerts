@@ -114,6 +114,9 @@ final public class ChangeBlockBreakListener {
         else if (type.equals(BlockTypes.GOLD_ORE)) {
             color = TextColors.YELLOW;
         }
+        else if (type.equals(BlockTypes.EMERALD_ORE)) {
+            color = TextColors.GREEN;
+        }
         else if (type.equals(BlockTypes.DIAMOND_ORE)) {
             color = TextColors.AQUA;
         }
@@ -125,6 +128,7 @@ final public class ChangeBlockBreakListener {
         return (type.equals(BlockTypes.IRON_ORE) ||
                 type.equals(BlockTypes.GOLD_ORE) ||
                 type.equals(BlockTypes.DIAMOND_ORE) ||
+                type.equals(BlockTypes.EMERALD_ORE) ||
                 type.equals(BlockTypes.LAPIS_ORE));
     }
 
