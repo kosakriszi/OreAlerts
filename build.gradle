@@ -22,7 +22,7 @@ buildscript {
 // Apply plugin
 apply plugin: 'java'
 apply plugin: 'license'
-apply plugin: 'checkstyle'
+//apply plugin: 'checkstyle'
 apply plugin: 'maven'
 
 // Default tasks
@@ -75,15 +75,15 @@ license {
     strictCheck true
 }
 
-checkstyle {
-    configProperties = [
-        "name" : project.name,
-        "organization" : project.organization,
-        "url" : project.url,
-        "year" : project.inceptionYear
-    ]
-    configFile = file("checkstyle.xml")
-}
+//checkstyle {
+//    configProperties = [
+//        "name" : project.name,
+//        "organization" : project.organization,
+//        "url" : project.url,
+//        "year" : project.inceptionYear
+//    ]
+//    configFile = file("checkstyle.xml")
+//}
 
 // Source compiler configuration
 configure([compileJava, compileTestJava]) {

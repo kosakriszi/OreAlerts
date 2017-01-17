@@ -23,14 +23,23 @@
  */
 package com.helion3.orealerts;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import com.helion3.orealerts.config.OreConfig;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.world.Location;
@@ -40,49 +49,40 @@ import com.google.inject.Inject;
 
 @Plugin(id = "orealerts", name = "OreAlerts", description = "Ore alert plugin for Sponge servers.", version = "1.0")
 final public class OreAlerts {
-    private static Game game;
-    public static Map<Location<World>, Long> recentLocations = new ConcurrentHashMap<Location<World>, Long>();
 
-    /**
-     * Performs bootstrapping of Prism resources/objects.
-     *
-     * @param event Server started
-     */
+    public static OreConfig config;
+    public static Map<Location<World>, Long> recentLocations = new ConcurrentHashMap<>();
+    @Inject @ConfigDir(sharedRoot = true) private Path configDir;
+    @Inject @DefaultConfig(sharedRoot = true) private ConfigurationLoader<CommentedConfigurationNode> configLoader;
+    @Inject private Game game;
+
     @Listener
-    public void onServerStart(GameStartedServerEvent event) {
-        expireCheckedLocations();
+    public void onPreInit(GamePreInitializationEvent event) {
+        try {
+            Files.createDirectories(configDir);
+            config = OreConfig.fromLoader(configLoader);
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Error while enabling OreAlerts!", e);
+        }
+    }
 
+    @Listener
+    public void onInit(GameInitializationEvent event) {
         game.getEventManager().registerListeners(this, new ChangeBlockBreakListener());
-    }
-
-    /**
-     * Injected Game instance.
-     * @param injectGame Game
-     */
-    @Inject
-    public void setGame(Game injectGame) {
-        game = injectGame;
-    }
-
-    /**
-     * Remove expired recent locations
-     */
-    public void expireCheckedLocations(){
         game.getScheduler().createTaskBuilder()
-            .async()
-            .delay(5L, TimeUnit.MINUTES)
-            .interval(5L, TimeUnit.MINUTES)
-            .execute(new Runnable(){
-                @Override
-                public void run() {
+                .async()
+                .delay(5L, TimeUnit.MINUTES)
+                .interval(5L, TimeUnit.MINUTES)
+                .execute(() -> {
                     long time = new Date().getTime();
-                    for (final Entry<Location<World>, Long> entry : recentLocations.entrySet()) {
-                        final long diff = (time - entry.getValue()) / 1000;
+                    for (Entry<Location<World>, Long> entry : recentLocations.entrySet()) {
+                        long diff = (time - entry.getValue()) / 1000;
                         if (diff >= 300) {
                             recentLocations.remove( entry.getKey() );
                         }
                     }
-                }
-            }).submit(this);
+                }).submit(this);
     }
+
 }

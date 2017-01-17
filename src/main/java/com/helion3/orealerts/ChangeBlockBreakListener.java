@@ -23,16 +23,12 @@
  */
 package com.helion3.orealerts;
 
-import java.util.Date;
-import java.util.Optional;
-
+import com.helion3.orealerts.config.OreEntry;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.property.block.GroundLuminanceProperty;
-import org.spongepowered.api.data.property.block.LightEmissionProperty;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
@@ -40,16 +36,18 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 final public class ChangeBlockBreakListener {
     private final MessageChannel channel = MessageChannel.permission("orealerts.receive");
 
     @Listener
-    public void onChangeBlock(final ChangeBlockEvent.Break event) {
+    public void onChangeBlock(ChangeBlockEvent.Break event) {
         Optional<Player> optionalPlayer = event.getCause().first(Player.class);
 
         // Must be player-driven
@@ -72,64 +70,42 @@ final public class ChangeBlockBreakListener {
             }
 
             // Skip if there was a creator
-            if (transaction.getOriginal().getCreator().isPresent()) {
-                continue;
-            }
+//            if (transaction.getOriginal().getCreator().isPresent()) {
+//                continue;
+//            }
 
-            BlockType type = transaction.getOriginal().getState().getType();
-
-            if (isWatchedOre(type)) {
+            BlockState state = transaction.getOriginal().getState();
+            Optional<OreEntry> oreEntryOptional = isWatchedOre(state);
+            if (oreEntryOptional.isPresent()) {
+                OreEntry oreEntry = oreEntryOptional.get();
                 // Count blocks in this vein
                 int matchCount = findNeighborBlocks(transaction.getOriginal()) + 1;
 
                 // Get lighting condition
                 Optional<GroundLuminanceProperty> lightOptional = transaction.getOriginal().getLocation().get().getProperty(GroundLuminanceProperty.class);
 
-                if(lightOptional.isPresent()) {
-                    int emittedLight = (int) Math.floor((lightOptional.get().getValue() / 15D) * 100);
-
-                    // Message with lighting emission
-                    channel.send(Text.of(getColor(type), "[Ore] ", player.getName(), " found " + matchCount + " ", getNiceName(type), "in ", emittedLight, "% light."));
-                } else {
-                    // Message
-                    channel.send(Text.of(getColor(type), "[Ore] ", player.getName(), " found " + matchCount + " ", getNiceName(type)));
+                if (lightOptional.isPresent()) {
+                    Double luminance = lightOptional.get().getValue();
+                    if (luminance != null) {
+                        int emittedLight = (int) Math.floor((luminance / 15D) * 100);
+                        channel.send(Text.of(oreEntry.getColor(), "[Ore] ", player.getName(), " found " + matchCount + " ", oreEntry.getName(), " in ", emittedLight, "% light."));
+                    }
+                }
+                else {
+                    channel.send(Text.of(oreEntry.getColor(), "[Ore] ", player.getName(), " found " + matchCount + " ", oreEntry.getName()));
                 }
             }
-         }
+        }
     }
 
-    private Text getNiceName(BlockType type) {
-        return Text.of(type.getId().replaceAll("minecraft:", "").replace("_ore", " "));
-    }
-
-    private TextColor getColor(BlockType type) {
-        TextColor color = TextColors.WHITE;
-
-        if (type.equals(BlockTypes.IRON_ORE)) {
-            color = TextColors.GRAY;
+    private Optional<OreEntry> isWatchedOre(BlockState state) {
+        List<OreEntry> oreEntries = OreAlerts.config.getOreEntries();
+        for (OreEntry oreEntry : oreEntries) {
+            if (oreEntry.equals(state)) {
+                return Optional.of(oreEntry);
+            }
         }
-        else if (type.equals(BlockTypes.LAPIS_ORE)) {
-            color = TextColors.BLUE;
-        }
-        else if (type.equals(BlockTypes.GOLD_ORE)) {
-            color = TextColors.YELLOW;
-        }
-        else if (type.equals(BlockTypes.EMERALD_ORE)) {
-            color = TextColors.GREEN;
-        }
-        else if (type.equals(BlockTypes.DIAMOND_ORE)) {
-            color = TextColors.AQUA;
-        }
-
-        return color;
-    }
-
-    private boolean isWatchedOre(BlockType type) {
-        return (type.equals(BlockTypes.IRON_ORE) ||
-                type.equals(BlockTypes.GOLD_ORE) ||
-                type.equals(BlockTypes.DIAMOND_ORE) ||
-                type.equals(BlockTypes.EMERALD_ORE) ||
-                type.equals(BlockTypes.LAPIS_ORE));
+        return Optional.empty();
     }
 
     private int findNeighborBlocks(BlockSnapshot snapshot) {
